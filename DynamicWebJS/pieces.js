@@ -119,3 +119,11 @@ const pElementsDisponible = document.createElement('p')
 pElementsDisponible.innerText = "Pièces disponibles:";
 document.querySelector('.disponibles').appendChild(pElementsDisponible).appendChild(disponiblesElement)
 
+const inputPrixMax = document.querySelector('#prix-max')
+inputPrixMax.addEventListener('input', function () {
+    const piecesFiltrees = pieces.filter(function (piece) {
+        return piece.prix <= inputPrixMax.value;
+    });
+    document.querySelector(".fiches").innerHTML = "";
+    genererPieces(piecesFiltrees);
+})
