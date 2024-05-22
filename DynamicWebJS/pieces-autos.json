@@ -31,7 +31,7 @@
         "nom": "Liquide de frein",
         "prix": 9.60,
         "categorie": "Freinage",
-        "image": "images/liquide-frein",
+        "image": "images/liquide-frein.png",
         "disponibilite": true
     },
     {
