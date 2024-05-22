@@ -1,7 +1,9 @@
-import { ajoutListenersAvis } from "./avis.js";
+import { ajoutListenersAvis, ajoutListenerEnvoyerAvis } from "./avis.js";
 // Récupération des pièces depuis le fichier JSON
-const reponse = await fetch('pieces-autos.json');
+const reponse = await fetch('http://localhost:8081/pieces');
 const pieces = await reponse.json();
+
+ajoutListenerEnvoyerAvis()
 
 function genererPieces(pieces) {
     for (let i = 0; i < pieces.length; i++) {
@@ -36,7 +38,6 @@ function genererPieces(pieces) {
     }
     ajoutListenersAvis();
 }
-
 genererPieces(pieces);
 
 const boutonTrier = document.querySelector(".btn-trier");
@@ -58,7 +59,6 @@ boutonFiltrer.addEventListener("click", function () {
     genererPieces(piecesFiltrees);
 });
 
-//Correction Exercice
 const boutonDecroissant = document.querySelector(".btn-decroissant");
 boutonDecroissant.addEventListener("click", function () {
     const piecesOrdonnees = Array.from(pieces);
@@ -95,12 +95,11 @@ for (let i = 0; i < noms.length; i++) {
     nomElement.innerText = noms[i];
     abordablesElements.appendChild(nomElement);
 }
-// Ajout de l'en-tête puis de la liste au bloc résultats filtres
+
 document.querySelector('.abordables')
     .appendChild(pElement)
     .appendChild(abordablesElements);
 
-//Code Exercice 
 const nomsDisponibles = pieces.map(piece => piece.nom)
 const prixDisponibles = pieces.map(piece => piece.prix)
 
