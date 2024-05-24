@@ -1,28 +1,31 @@
 import { ajoutListenersAvis, ajoutListenerEnvoyerAvis, afficherAvis } from "./avis.js";
-//Recuperation des pieces eventuellement stcokees dans le localStorage
+//Récupération des pièces eventuellement stockées dans le localStorage
 let pieces = window.localStorage.getItem('pieces');
 
 if (pieces === null) {
     // Récupération des pièces depuis l'API
-    const reponse = await fetch('http://localhost:8081/pieces');
+    const reponse = await fetch('http://localhost:8081/pieces/');
     pieces = await reponse.json();
-    //transformation des pieces en JSON
+    // Transformation des pièces en JSON
     const valeurPieces = JSON.stringify(pieces);
-    //Stockage des informations dans le localStorage
+    // Stockage des informations dans le localStorage
     window.localStorage.setItem("pieces", valeurPieces);
 } else {
     pieces = JSON.parse(pieces);
 }
-
-
+// on appel la fonction pour ajouter le listener au formulaire
 ajoutListenerEnvoyerAvis()
 
 function genererPieces(pieces) {
     for (let i = 0; i < pieces.length; i++) {
 
         const article = pieces[i];
+        // Récupération de l'élément du DOM qui accueillera les fiches
         const sectionFiches = document.querySelector(".fiches");
+        // Création d’une balise dédiée à une pièce automobile
         const pieceElement = document.createElement("article");
+        pieceElement.dataset.id = pieces[i].id
+        // Création des balises 
         const imageElement = document.createElement("img");
         imageElement.src = article.image;
         const nomElement = document.createElement("h2");
@@ -35,10 +38,12 @@ function genererPieces(pieces) {
         descriptionElement.innerText = article.description ?? "Pas de description pour le moment.";
         const stockElement = document.createElement("p");
         stockElement.innerText = article.disponibilite ? "En stock" : "Rupture de stock";
+        //Code ajouté
         const avisBouton = document.createElement("button");
         avisBouton.dataset.id = article.id;
         avisBouton.textContent = "Afficher les avis";
 
+        // On rattache la balise article a la section Fiches
         sectionFiches.appendChild(pieceElement);
         pieceElement.appendChild(imageElement);
         pieceElement.appendChild(nomElement);
@@ -46,23 +51,29 @@ function genererPieces(pieces) {
         pieceElement.appendChild(categorieElement);
         pieceElement.appendChild(descriptionElement);
         pieceElement.appendChild(stockElement);
+        //Code aJouté
         pieceElement.appendChild(avisBouton);
+
     }
     ajoutListenersAvis();
 }
+
 genererPieces(pieces);
 
 for (let i = 0; i < pieces.length; i++) {
-    const id = piece[i].id;
+    const id = pieces[i].id;
     const avisJSON = window.localStorage.getItem(`avis-piece-${id}`);
     const avis = JSON.parse(avisJSON);
+
     if (avis !== null) {
-        const pieceElement = document.querySelector(`article[data-is"${id}"]`);
+        const pieceElement = document.querySelector(`article[data-id="${id}"]`);
         afficherAvis(pieceElement, avis)
     }
 }
 
+//gestion des boutons 
 const boutonTrier = document.querySelector(".btn-trier");
+
 boutonTrier.addEventListener("click", function () {
     const piecesOrdonnees = Array.from(pieces);
     piecesOrdonnees.sort(function (a, b) {
@@ -73,6 +84,7 @@ boutonTrier.addEventListener("click", function () {
 });
 
 const boutonFiltrer = document.querySelector(".btn-filtrer");
+
 boutonFiltrer.addEventListener("click", function () {
     const piecesFiltrees = pieces.filter(function (piece) {
         return piece.prix <= 35;
@@ -81,7 +93,9 @@ boutonFiltrer.addEventListener("click", function () {
     genererPieces(piecesFiltrees);
 });
 
+//Correction Exercice
 const boutonDecroissant = document.querySelector(".btn-decroissant");
+
 boutonDecroissant.addEventListener("click", function () {
     const piecesOrdonnees = Array.from(pieces);
     piecesOrdonnees.sort(function (a, b) {
@@ -92,6 +106,7 @@ boutonDecroissant.addEventListener("click", function () {
 });
 
 const boutonNoDescription = document.querySelector(".btn-nodesc");
+
 boutonNoDescription.addEventListener("click", function () {
     const piecesFiltrees = pieces.filter(function (piece) {
         return piece.description
@@ -107,17 +122,19 @@ for (let i = pieces.length - 1; i >= 0; i--) {
     }
 }
 console.log(noms)
+//Création de l'en-tête
 
 const pElement = document.createElement('p')
 pElement.innerText = "Pièces abordables";
+//Création de la liste
 const abordablesElements = document.createElement('ul');
-
+//Ajout de chaque nom à la liste
 for (let i = 0; i < noms.length; i++) {
     const nomElement = document.createElement('li');
     nomElement.innerText = noms[i];
     abordablesElements.appendChild(nomElement);
 }
-
+// Ajout de l'en-tête puis de la liste au bloc résultats filtres
 document.querySelector('.abordables')
     .appendChild(pElement)
     .appendChild(abordablesElements);
@@ -153,8 +170,8 @@ inputPrixMax.addEventListener('input', function () {
     genererPieces(piecesFiltrees);
 })
 
-//Ajout du listener pour mettre à jour des données du localStorage
-const boutonMettreAJour = document - querySelector(".btn-maj");
+// Ajout du listener pour mettre à jour des données du localStorage
+const boutonMettreAJour = document.querySelector(".btn-maj");
 boutonMettreAJour.addEventListener("click", function () {
     window.localStorage.removeItem("pieces");
 });
