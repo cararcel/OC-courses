@@ -1,8 +1,11 @@
-import { plantList } from "../datas/plantList"
+import { plantList } from '../datas/plantList'
+import CareScale from './CareScale'
+import '../styles/ShoppingList.css'
 
 function ShoppingList() {
     const categories = plantList.reduce(
 		(acc, plant) =>
+        //The conditional (ternary) Operator
         // Checks if acc (current accumulated array) already includes the category of the current plant.
         // If acc already includes plant.category, it returns acc unchanged (to keep the category unique).
         // If acc does not include plant.category, it concatenates (acc.concat) the plant.category to acc, thus adding the new category to the accumulated list.
@@ -10,19 +13,25 @@ function ShoppingList() {
 		[]
 	)
     return (
-        <div>
+		<div>
 			<ul>
 				{categories.map((cat) => (
 					<li key={cat}>{cat}</li>
 				))}
 			</ul>
-			<ul>
-				{plantList.map((plant) => (
-					<li key={plant.id}>{plant.name}</li>
+			<ul className='lmj-plant-list'>
+				{plantList.map(({ id, cover, name, water, light }) => (
+					<PlantItem
+						key={id}
+						cover={cover}
+						name={name}
+						water={water}
+						light={light}
+					/>
 				))}
 			</ul>
 		</div>
-    )
+	)
 }
 
 export default ShoppingList
