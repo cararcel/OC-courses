@@ -11,7 +11,6 @@ const quantityLabel = {
 function CareScale({ scaleValue, careType }) {
 	const range = [1, 2, 3]
 	const scaleType = 
-
 	//care type es light use sun icon, else (water) use water icon
         careType === 'light' ? (
             <img src={Sun} alt='sun-icon' />
