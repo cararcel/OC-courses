@@ -40,28 +40,25 @@ function Freelancers() {
     `http://localhost:8000/freelances`
   )
 
-  // Ici le "?" permet de s'assurer que data existe bien.
-  // Vous pouvez en apprendre davantage sur cette notation ici :
-  // https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Operators/Optional_chaining
   const freelancersList = data?.freelancersList
 
   if (error) {
-    return <span>Oops! There is an error</span>
+    return <span>There is an error</span>
   }
 
   return (
     <div>
       <PageTitle theme={theme}>Find your service provider</PageTitle>
       <PageSubtitle theme={theme}>
-        Here at Shiny we bring together the best profiles for you
+        Here at Shiny we bring together the best profiles for you.
       </PageSubtitle>
       {isLoading ? (
         <LoaderWrapper>
-          <Loader theme={theme} />
+          <Loader theme={theme} data-testid="loader" />
         </LoaderWrapper>
       ) : (
         <CardsContainer>
-          {freelancersList.map((profile, index) => (
+          {freelancersList?.map((profile, index) => (
             <Card
               key={`${profile.name}-${index}`}
               label={profile.job}
