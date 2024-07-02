@@ -15,7 +15,7 @@ describe('The Home component', () => {
     expect(
       screen.getByRole('heading', {
         level: 2,
-        text: 'Repérez vos besoins, on s’occupe du reste, avec les meilleurs talents',
+        text: "Identify your needs and we'll take care of the rest along with our talented professionals",
       })
     ).toBeTruthy()
   })

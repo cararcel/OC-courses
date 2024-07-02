@@ -1,127 +1,64 @@
-import { useContext } from 'react'
-import { SurveyContext } from '../../utils/context'
-import styled from 'styled-components'
-import colors from '../../utils/style/colors'
-import { useFetch, useTheme } from '../../utils/hooks'
-import { StyledLink, Loader } from '../../utils/style/Atoms'
+import Results, { formatJobList, formatQueryParams } from './'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import { waitForElementToBeRemoved, screen } from '@testing-library/react'
+import { render } from '../../utils/test'
 
-const ResultsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 60px 90px;
-  padding: 30px;
-  background-color: ${({ theme }) =>
-    theme === 'light' ? colors.backgroundLight : colors.backgroundDark};
-`
+describe('The formatJobList function', () => {
+  it('should add a comma to a word', () => {
+    const expectedState = 'item2,'
+    expect(formatJobList('item2', 3, 1)).toEqual(expectedState)
+  })
+  it('should not add a comma to the last element of the list', () => {
+    const expectedState = 'item3'
+    expect(formatJobList('item3', 3, 2)).toEqual(expectedState)
+  })
+})
 
-const ResultsTitle = styled.h2`
-  color: ${({ theme }) => (theme === 'light' ? '#000000' : '#ffffff')};
-  font-weight: bold;
-  font-size: 28px;
-  max-width: 60%;
-  text-align: center;
-  & > span {
-    padding-left: 10px;
-  }
-`
+describe('The formatQueryParams function', () => {
+  it('should use the right format for param', () => {
+    const expectedState = 'a1=answer1'
+    expect(formatQueryParams({ 1: 'answer1' })).toEqual(expectedState)
+  })
+  it('should concatenate params with an &', () => {
+    const expectedState = 'a1=answer1&a2=answer2'
+    expect(formatQueryParams({ 1: 'answer1', 2: 'answer2' })).toEqual(
+      expectedState
+    )
+  })
+})
 
-const DescriptionWrapper = styled.div`
-  padding: 60px;
-`
+const resultsMockedData = [
+  {
+    title: 'seo',
+    description: `Le SEO est en charge du référencement web d'une page`,
+  },
+  {
+    title: 'frontend',
+    description: `Le développeur ou la développeuse frontend se charge de l'interface : interactions avec l'utilisateur, style, etc.`,
+  },
+]
 
-const JobTitle = styled.span`
-  color: ${({ theme }) =>
-    theme === 'light' ? colors.primary : colors.backgroundLight};
-  text-transform: capitalize;
-`
+const server = setupServer(
+  rest.get('http://localhost:8000/results', (req, res, ctx) => {
+    return res(ctx.json({ resultsData: resultsMockedData }))
+  })
+)
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
-const JobDescription = styled.div`
-  font-size: 18px;
-  & > p {
-    color: ${({ theme }) => (theme === 'light' ? colors.secondary : '#ffffff')};
-    margin-block-start: 5px;
-  }
-  & > span {
-    font-size: 20px;
-  }
-`
-
-const LoaderWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-`
-
-export function formatQueryParams(answers) {
-  const answerNumbers = Object.keys(answers)
-
-  return answerNumbers.reduce((previousParams, answerNumber, index) => {
-    const isFirstParam = index === 0
-    const separator = isFirstParam ? '' : '&'
-    return `${previousParams}${separator}a${answerNumber}=${answers[answerNumber]}`
-  }, '')
-}
-
-export function formatJobList(title, listLength, index) {
-  if (index === listLength - 1) {
-    return title
-  } else {
-    return `${title},`
-  }
-}
-
-function Results() {
-  const { theme } = useTheme()
-  const { answers } = useContext(SurveyContext)
-  const queryParams = formatQueryParams(answers)
-
-  const { data, isLoading, error } = useFetch(
-    `http://localhost:8000/results?${queryParams}`
-  )
-
-  if (error) {
-    return <span>There is an error</span>
-  }
-
-  const resultsData = data?.resultsData
-
-  return isLoading ? (
-    <LoaderWrapper>
-      <Loader data-testid="loader" />
-    </LoaderWrapper>
-  ) : (
-    <ResultsContainer theme={theme}>
-      <ResultsTitle theme={theme}>
-        You require the following skills:
-        {resultsData &&
-          resultsData.map((result, index) => (
-            <JobTitle
-              key={`result-title-${index}-${result.title}`}
-              theme={theme}
-            >
-              {formatJobList(result.title, resultsData.length, index)}
-            </JobTitle>
-          ))}
-      </ResultsTitle>
-      <StyledLink $isFullLink to="/freelancers">
-        Take a look at our freelancer profiles
-      </StyledLink>
-      <DescriptionWrapper>
-        {resultsData &&
-          resultsData.map((result, index) => (
-            <JobDescription
-              theme={theme}
-              key={`result-detail-${index}-${result.title}`}
-            >
-              <JobTitle theme={theme} data-testid="job-title">
-                {result.title}
-              </JobTitle>
-              <p data-testid="job-description">{result.description}</p>
-            </JobDescription>
-          ))}
-      </DescriptionWrapper>
-    </ResultsContainer>
-  )
-}
-
-export default Results
+describe('The Results component', () => {
+  it('should display the results after the data is loaded', async () => {
+    render(<Results />)
+    await waitForElementToBeRemoved(() => screen.getByTestId('loader'))
+    const jobTitleElements = screen.getAllByTestId('job-title')
+    expect(jobTitleElements[0].textContent).toBe('seo')
+    expect(jobTitleElements.length).toBe(2)
+    const jobDescriptionElements = screen.getAllByTestId('job-description')
+    expect(jobDescriptionElements[1].textContent).toBe(
+      resultsMockedData[1].description
+    )
+    expect(jobDescriptionElements.length).toBe(2)
+  })
+})
