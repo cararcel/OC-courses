@@ -2,8 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
-const Thing = require('./models/Things');
-const Things = require('./models/Things');
+// const Thing = require('./models/Things');
+// const Things = require('./models/Things');
+
+const Product = require('./models/Products');
+
 mongoose
     .connect(
         'mongodb+srv://cararcel:sBl1VU6awVWVYWVl@cluster0.jkrjplp.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0',
@@ -27,39 +30,48 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/api/stuff', (req, res, next) => {
+app.post('/api/products', (req, res, next) => {
     delete req.body._id;
-    const thing = new Thing({
+    const product = new Product({
         ...req.body,
     });
-    thing
+    product
         .save()
-        .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-        .catch((error) => res.status(400).json({ error }));
+        .then(() => res.status(201).json({ product }))
+        .catch((error) => {
+            console.error(error);
+            res.status(400).json({ error });
+        });
 });
 
-app.put('/api/stuff/:id', (req, res, next) => {
-    Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+app.put('/api/products/:id', (req, res, next) => {
+    Product.updateOne(
+        { _id: req.params.id },
+        { ...req.body, _id: req.params.id }
+    )
         .then(() => res.status(200).json({ message: 'Objet modifié' }))
         .catch((error) => res.status(400).json({ error }));
 });
 
-app.delete('/api/stuff/:id', (req, res, next) => {
-    Thing.deleteOne({ _id: req.params.id })
+app.delete('/api/products/:id', (req, res, next) => {
+    Product.deleteOne({ _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Objet supprimé !' }))
         .catch((error) => res.status(400).json({ error }));
 });
 
-app.get('/api/stuff/:id', (req, res, next) => {
-    Thing.findOne({ _id: req.params.id })
-        .then((thing) => res.status(200).json(thing))
+app.get('/api/products/:id', (req, res, next) => {
+    Product.findOne({ _id: req.params.id })
+        .then((product) => res.status(200).json({ product }))
         .catch((error) => res.status(400).json({ error }));
 });
 
-app.get('/api/stuff', (req, res, next) => {
-    Thing.find()
-        .then((things) => res.status(200).json(things))
-        .catch((erro) => res.status(400).json({ error }));
+app.get('/api/products', (req, res, next) => {
+    Product.find()
+        .then((products) => res.status(200).json({ products }))
+        .catch((error) => {
+            console.error(error);
+            res.status(400).json({ error });
+        });
 });
 
 module.exports = app;
